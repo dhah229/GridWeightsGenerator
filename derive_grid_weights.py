@@ -170,7 +170,7 @@ if dojson:
 
 if not(SubId is None):
 
-    SubId = [ np.int(ss.strip()) for ss in SubId.split(',') ]
+    SubId = [ int(ss.strip()) for ss in SubId.split(',') ]
 
 if (SubId is None) and (basin is None) and not(doall):
     raise ValueError("Either gauge ID (option -b; e.g., 02AB003) or SubId ID (option -s; e.g., 7173) specified in shapefile needs to be given. You specified none. This basin will be the most downstream gridweights of all upstream subbasins will be added automatically.")
@@ -425,7 +425,7 @@ if not(doall):
         idx_basins = [ list(np.where(shape['Obs_NM']==bb)[0]) for bb in basins ]
 
         # find corresponding SubId
-        SubId = [ np.int(shape.loc[idx_basin].SubId) for idx_basin in idx_basins ]
+        SubId = [ int(shape.loc[idx_basin].SubId) for idx_basin in idx_basins ]
         print("   >>> found gauge at SubId = ",SubId)
 
     if not(SubId is None): # if basin ID is given
@@ -442,7 +442,7 @@ if not(doall):
                 new_SubId = [ list(shape.loc[(np.where(shape['DowSubId']==ii))[0]].SubId) for ii in new_SubId ]  # find all upstream catchments of these new basins
                 new_SubId = list(np.unique([item for sublist in new_SubId for item in sublist])) # flatten list and make entries unique
 
-            old_SubId   = np.array([item for sublist in old_SubId for item in sublist],dtype=np.int)  # flatten list
+            old_SubId   = np.array([item for sublist in old_SubId for item in sublist],dtype=int)  # flatten list
             old_SubIds += list(old_SubId)
 
         old_SubIds = list( np.sort(np.unique(old_SubIds)) )
