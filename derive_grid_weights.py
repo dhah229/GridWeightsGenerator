@@ -96,6 +96,8 @@ from   osgeo   import ogr
 from   osgeo   import osr
 from   osgeo   import __version__ as osgeo_version
 
+import xarray as xr
+
 
 
 input_file           = "example/input_VIC/VIC_streaminputs.nc"
@@ -167,6 +169,7 @@ dojson               = args.dojson
 if dojson:
     # write geoJSON files (eventually)
     import geojson as gjs
+import xarray as xr
 
 if not(SubId is None):
 
@@ -605,6 +608,10 @@ if dojson:
     geojson = []
 
 error_dict = {}
+
+S = []
+col = []
+row = []
 for ikk,kk in enumerate(keys):
 
     ibasin = shape.loc[kk]
@@ -652,6 +659,9 @@ for ikk,kk in enumerate(keys):
         for idata in data_to_write:
             print("   >>> {0},{1},{2},{3},{4}".format(idata[0],idata[1],idata[2],idata[3],idata[4]))
             ff.write("   {0}   {1}   {2}\n".format(idata[0],idata[3],idata[4]))
+            S.append(idata[4])
+            col.append(idata[3]+1)
+            row.append(ikk + 1)
 
     else:
         # adjust such that weights sum up to 1.0
@@ -659,6 +669,9 @@ for ikk,kk in enumerate(keys):
             corrected = idata[4] * 1.0/(1.0-error)
             print("   >>> {0},{1},{2},{3},{4}  (corrected to {5})".format(idata[0],idata[1],idata[2],idata[3],idata[4],corrected))
             ff.write("   {0}   {1}   {2}\n".format(idata[0],idata[3],corrected))
+            S.append(idata[4])
+            col.append(idata[3]+1)
+            row.append(ikk + 1)
 
         if error < 1.0:
             area_all *= 1.0/(1.0-error)
@@ -672,6 +685,24 @@ for ikk,kk in enumerate(keys):
 
 ff.write(':EndGridWeights \n')
 ff.close()
+
+# make a netcdf
+# Create a dataset
+ds = xr.Dataset(
+    {
+        "S": (["n_s"], S),
+        "col": (["n_s"], col),
+        "row": (["n_s"], row),
+    },
+)
+
+# Define the output NetCDF file path
+netcdf_output_file = '.'.join(filename.split('.')[0:-1]) + ".nc"
+
+# Save the dataset to a NetCDF file
+ds.to_netcdf(netcdf_output_file)
+
+print('Wrote: ', netcdf_output_file)
 
 # write geoson
 if dojson:

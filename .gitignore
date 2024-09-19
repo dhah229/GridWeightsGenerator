@@ -2,3 +2,5 @@
 
 example/input_*/*.txt
 example/input_*/*_agg.nc
+*.nc
+*.ipynb
